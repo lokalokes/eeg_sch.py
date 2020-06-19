@@ -21,29 +21,27 @@ def frame(way):
                                index=None)
         return data_frame
    
-    """f0=50.0 #should be removed from eeg data #filter
-    Q=30.0 #quality factor
-    b,a=signal.iirnotch(f0/fs,Q)
+def filtering(channel):
+    from scipy import signal
+    import numpy as np
+    import matplotlib.pyplot as plt
+    
+    
+    fs = 128.0  # Sample frequency (Hz)
+    f0 = 50  # Frequency to be removed from signal (Hz)
+    w0 = f0 / (fs / 2)  # Normalized Frequency
+    Q= 30
+    b, a = signal.iirnotch(w0, Q)
+    channel = signal.filtfilt(b, a, channel)
+    return (channel) 
 
-    freq,h=signal.freqz(b,a) #frequency response
-
-    fig,ax=plt.subplots(1,1, figsize=(8,6))
-    ax[0].plot(freq, 20*np.log10(abs(h)),color='blue')
-    ax[0].set_title("Frequency response")
-    ax[0].set_ylabel("Amplitude (bB)", color='blue')
-    ax[0].set_xlim([0,100])
-    ax[0].set_ylim([-25,10])
-    ax[0].grid()
-
-    plt.show()""" 
-
-def visual(data_frame):
+def visual(channel):
 
     #Plot EEG raw signal in mkV
     sns.set(font_scale=1.2)
     
     fig,ax=plt.subplots(1,1, figsize=(12,6))
-    plt.plot(time, data_frame, lw=1.5, color='k')
+    plt.plot(time, channel, lw=1.5, color='k')
     plt.title('Signal')
     plt.xlabel('Time (seconds)')
     plt.ylabel('EEG signal (mkV)')
@@ -53,7 +51,7 @@ def visual(data_frame):
     sns.despine()
     return
     
-def power(data, sf, band, window_sec=None, relative=False):
+def power(channel, sf, band, window_sec=None, relative=False):
     """Compute the average power of the signal x in a specific frequency band.
 
     Parameters
@@ -80,7 +78,7 @@ def power(data, sf, band, window_sec=None, relative=False):
     from scipy.integrate import simps
     band = np.asarray(band)
     low, high = band
-
+    channel=filtering(channel)
         # Define window length
     if window_sec is not None:
         nperseg = window_sec * sf
